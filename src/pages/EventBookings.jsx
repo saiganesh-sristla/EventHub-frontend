@@ -125,7 +125,6 @@ const EventBookings = () => {
       </div>
     );
   }
-
   return (
     <div className="bg-white min-h-screen">
       <div className="bg-blue-900 text-white">

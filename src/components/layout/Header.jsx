@@ -54,7 +54,7 @@ const Header = () => {
                   <button className="flex items-center text-white hover:text-gray-200 rounded-md p-2 transition duration-200">
                     <div className="mr-2">
                       <div className="h-8 w-8 rounded-full bg-blue-700 flex items-center justify-center text-white font-medium">
-                        {user.name.charAt(0).toUpperCase()}
+                        {user.name?.charAt(0).toUpperCase()}
                       </div>
                     </div>
                     <span className="font-medium">{user.name}</span>
@@ -149,7 +149,7 @@ const Header = () => {
               <div className="border-t border-blue-700 pt-2">
                 <div className="px-3 py-2 flex items-center">
                   <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium mr-2">
-                    {user.name.charAt(0).toUpperCase()}
+                    {user.name?.charAt(0).toUpperCase()}
                   </div>
                   <span className="text-white font-medium">{user.name}</span>
                 </div>

@@ -128,6 +128,32 @@ const MyBookings = () => {
     }
   };
 
+  // Function to check if the event has passed
+  const isEventPassed = (eventDate, eventTime) => {
+    const now = new Date();
+    const eventDateTime = new Date(eventDate);
+    
+    // Parse time (assuming format like "7:00 PM")
+    const timeParts = eventTime.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (timeParts) {
+      let hours = parseInt(timeParts[1]);
+      const minutes = parseInt(timeParts[2]);
+      const ampm = timeParts[3].toUpperCase();
+      
+      // Convert hours to 24-hour format
+      if (ampm === 'PM' && hours < 12) {
+        hours += 12;
+      } else if (ampm === 'AM' && hours === 12) {
+        hours = 0;
+      }
+      
+      // Set time components on event date
+      eventDateTime.setHours(hours, minutes, 0, 0);
+    }
+    
+    return now > eventDateTime;
+  };
+
   // State to hold the current booking for ticket generation
   const [ticketBooking, setTicketBooking] = useState(null);
 
@@ -194,79 +220,90 @@ const MyBookings = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {bookings.map(booking => (
-                  <tr key={booking._id} className="hover:bg-gray-50 transition duration-150">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                          </svg>
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{booking.event.title}</div>
-                          <div className="text-sm text-gray-500">{booking.event.location}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">{new Date(booking.event.date).toLocaleDateString()}</div>
-                      <div className="text-sm text-gray-500">{booking.event.time}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {booking.ticketCount} {booking.ticketCount === 1 ? 'ticket' : 'tickets'}
-                      </div>
-                      <div className="text-sm text-green-600 font-medium">
-                        ${booking.totalAmount.toFixed(2)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                        ${booking.status === 'confirmed' ? 'bg-green-100 text-green-800' : 
-                          booking.status === 'cancelled' ? 'bg-red-100 text-red-800' : 
-                          'bg-yellow-100 text-yellow-800'}`}
-                      >
-                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium">
-                      {booking.status === 'pending' && (
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => handleConfirmBooking(booking._id)}
-                            className="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition duration-150"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                {bookings.map(booking => {
+                  const isPassed = isEventPassed(booking.event.date, booking.event.time);
+                  
+                  return (
+                    <tr key={booking._id} className="hover:bg-gray-50 transition duration-150">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                             </svg>
-                            Confirm
-                          </button>
-                          <button
-                            onClick={() => handleCancelBooking(booking._id)}
-                            className="inline-flex items-center px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition duration-150"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                            </svg>
-                            Cancel
-                          </button>
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900">{booking.event.title}</div>
+                            <div className="text-sm text-gray-500">{booking.event.location}</div>
+                          </div>
                         </div>
-                      )}
-                      {booking.status === 'confirmed' && (
-                        <button 
-                          onClick={() => downloadTicket(booking)}
-                          className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-150"
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-medium text-gray-900">{new Date(booking.event.date).toLocaleDateString()}</div>
+                        <div className="text-sm text-gray-500">{booking.event.time}</div>
+                        {isPassed && (
+                          <span className="text-xs font-medium text-red-600">Event passed</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-medium text-gray-900">
+                          {booking.ticketCount} {booking.ticketCount === 1 ? 'ticket' : 'tickets'}
+                        </div>
+                        <div className="text-sm text-green-600 font-medium">
+                          ${booking.totalAmount.toFixed(2)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                          ${booking.status === 'confirmed' ? 'bg-green-100 text-green-800' : 
+                            booking.status === 'cancelled' ? 'bg-red-100 text-red-800' : 
+                            'bg-yellow-100 text-yellow-800'}`}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                          </svg>
-                          Download Ticket
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                          {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm font-medium">
+                        {booking.status === 'pending' && (
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => handleConfirmBooking(booking._id)}
+                              className="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition duration-150"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                              Confirm
+                            </button>
+                            <button
+                              onClick={() => handleCancelBooking(booking._id)}
+                              className="inline-flex items-center px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition duration-150"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                              </svg>
+                              Cancel
+                            </button>
+                          </div>
+                        )}
+                        {booking.status === 'confirmed' && (
+                          <button 
+                            onClick={() => downloadTicket(booking)}
+                            className={`inline-flex items-center px-3 py-1.5 ${isPassed 
+                              ? 'bg-gray-400 cursor-not-allowed' 
+                              : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-md transition duration-150`}
+                            disabled={isPassed}
+                            title={isPassed ? "Cannot download ticket for past events" : "Download your ticket"}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                            Download Ticket
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

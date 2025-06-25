@@ -34,10 +34,10 @@ const EventDetail = () => {
   }, [id]);
 
   const handleBooking = async () => {
-    if (!isAuthenticated) {
-      navigate('/login', { state: { from: `/events/${id}` } });
-      return;
-    }
+    // if (!isAuthenticated) {
+    //   navigate('/login', { state: { from: `/events/${id}` } });
+    //   return;
+    // }
     
     try {
       const createdBooking = await createBooking({
